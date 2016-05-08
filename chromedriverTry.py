@@ -5,6 +5,7 @@ import requests
 import MySQLdb
 import re
 import sys
+import sys as Sys
 from colorama import init
 from colorama import Fore, Back, Style
 from bs4 import BeautifulSoup
@@ -12,6 +13,23 @@ import lxml
 from selenium import webdriver
 import selenium.webdriver.chrome.service as service
 init()
+
+def printProgress (iteration, total, prefix = '', suffix = '', decimals = 2, barLength = 100):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+    """
+    filledLength    = int(round(barLength * iteration / float(total)))
+    percents        = round(100.00 * (iteration / float(total)), decimals)
+    bar             = '#' * filledLength + '-' * (barLength - filledLength)
+    Sys.stdout.write('%s [%s] %s%s %s\r' % (prefix, bar, percents, '%', suffix)),
+    Sys.stdout.flush()
+    if iteration == total:
+        print("\n")
 
 error_counter=0
 reload(sys)
@@ -37,7 +55,7 @@ def run_query(sql_query):
 	return results
 
 # 搜尋目標
-targets = ["e-commerce","ubiquitous computing","social media","mobile commerce"]
+targets = ["social media","mobile commerce","e-commerce","ubiquitous computing"]
 begindate="2007"
 enddate="2016"
 sort_type = "0"
@@ -46,7 +64,7 @@ has_page=True
 driver = webdriver.Chrome('./chromedriver')  # Optional argument, if not specified will search path.
 check_result = 99999999999999
 for target in targets:
-	page=0
+	page=22262
 	total_result = check_result
 	flag=0
 	# print "(%d/%d)"%(page,total_result)
@@ -56,14 +74,15 @@ for target in targets:
 	urlpart_page = "&from=%d"%page
 	urlpart_sort = "&sort=%s"%(sort_type)
 	url = urlpart_site+urlpart_target+urlpart_year+urlpart_page+urlpart_sort
-	print url
+	# print url
 	driver = webdriver.Chrome('./chromedriver')  # Optional argument, if not specified will search path.
 	driver.get("%s"%(url));
 
 	# 走訪每一頁
 	while(page<=(total_result)):
 
-		print "[%d]%f(%d/%d)"%(error_counter,float(page)/total_result*100,page,total_result)
+		# print (Fore.WHITE+"[%d]%f(%d/%d)"%(error_counter,float(page)/total_result*100,page,total_result))
+		printProgress(page, total_result, prefix = 'Progress:', suffix = 'Complete', barLength = 50)
 		# page=page+8
 		sleep_time=float(random.randint(1000,2000))/1000
 		time.sleep(sleep_time) # Let the user actually see something!
@@ -119,7 +138,7 @@ for target in targets:
 			except Exception, e:
 			   # Rollback in case there is any error
 			   db.rollback()
-			   if e[0]!=10621:
+			   if e[0]!=1062:
 				   print (Fore.RED+"update faild!")
 				   print e
 		# break
